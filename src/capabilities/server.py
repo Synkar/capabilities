@@ -282,7 +282,8 @@ class CapabilityServer(object):
         self.__capability_instances = {}
         self.__launch_manager = LaunchManager(
             screen=bool(rospy.get_param('~use_screen', screen)),
-            nodelet_manager_name=rospy.get_param('~nodelet_manager_name', None)
+            nodelet_manager_name=rospy.get_param('~nodelet_manager_name', None),
+            use_monlaunch=bool(rospy.get_param('~use_monlaunch', False))
         )
         self.__debug = False
         self.__package_whitelist = None

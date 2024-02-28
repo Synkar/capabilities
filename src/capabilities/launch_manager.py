@@ -86,8 +86,9 @@ class LaunchManager(object):
     """Manages multiple launch files which implement capabilities"""
     __roslaunch_exec = which('roslaunch')
     __python_exec = which('python')
+    __monlaunch_exec = '/opt/ros/noetic/lib/rosmon_core/rosmon'
 
-    def __init__(self, quiet=False, screen=False, nodelet_manager_name=None):
+    def __init__(self, quiet=False, screen=False, nodelet_manager_name=None, use_monlaunch=False):
         self.__running_launch_files_lock = threading.Lock()
         with self.__running_launch_files_lock:
             self.__running_launch_files = {}
@@ -102,6 +103,7 @@ class LaunchManager(object):
         name += "" if name.startswith('/') else "/"
         name += nodelet_manager_name if nodelet_manager_name else rospy.get_name().split('/')[-1] + '_nodelet_manager'
         self.__nodelet_manager_name = name
+        self.__use_monlaunch = use_monlaunch
         self.__start_nodelet_manager()
 
     @property
@@ -185,14 +187,18 @@ class LaunchManager(object):
             if launch_file is None:
                 cmd = [self.__python_exec, _placeholder_script]
             else:
-                if self.__screen:
-                    cmd = [self.__roslaunch_exec, '--screen', launch_file]
+                if self.__use_monlaunch:
+                    cmd = [self.__monlaunch_exec, launch_file]
+                    rospy.loginfo(f'Using monlaunch for diagnostics, command executed: {self.__monlaunch_exec, launch_file}')
                 else:
-                    cmd = [self.__roslaunch_exec, launch_file]
-                if manager:
-                    cmd.append("capability_server_nodelet_manager_name:=" + self.__nodelet_manager_name.split('/')[-1])
-                else:
-                    cmd.append("capability_server_nodelet_manager_name:=" + self.__nodelet_manager_name)
+                    if self.__screen:
+                        cmd = [self.__roslaunch_exec, '--screen', launch_file]
+                    else:
+                        cmd = [self.__roslaunch_exec, launch_file]
+                    if manager:
+                        cmd.append("capability_server_nodelet_manager_name:=" + self.__nodelet_manager_name.split('/')[-1])
+                    else:
+                        cmd.append("capability_server_nodelet_manager_name:=" + self.__nodelet_manager_name)
             if self.__quiet:
                 env = copy.deepcopy(os.environ)
                 env['PYTHONUNBUFFERED'] = 'x'
