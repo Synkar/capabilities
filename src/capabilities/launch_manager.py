@@ -188,7 +188,7 @@ class LaunchManager(object):
                 cmd = [self.__python_exec, _placeholder_script]
             else:
                 if self.__use_monlaunch:
-                    cmd = [self.__monlaunch_exec, launch_file]
+                    cmd = [self.__monlaunch_exec, '--disable-ui' ,launch_file]
                     rospy.loginfo(f'Using monlaunch for diagnostics, command executed: {self.__monlaunch_exec, launch_file}')
                 else:
                     if self.__screen:
