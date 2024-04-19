@@ -89,6 +89,7 @@ class LaunchManager(object):
     __roslaunch_exec = which('roslaunch')
     __python_exec = which('python')
     __monlaunch_exec = '/opt/ros/noetic/lib/rosmon_core/rosmon'
+    log_datetime = datetime.now().strftime('%Y-%m-%d_%H-%M')
 
     def __init__(self, quiet=False, screen=False, nodelet_manager_name=None, use_monlaunch=False):
         self.__running_launch_files_lock = threading.Lock()
