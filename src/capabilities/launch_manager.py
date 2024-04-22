@@ -42,6 +42,8 @@ import os
 import subprocess
 import sys
 import threading
+from datetime import datetime
+from time import sleep
 
 import rospy
 
@@ -87,6 +89,7 @@ class LaunchManager(object):
     __roslaunch_exec = which('roslaunch')
     __python_exec = which('python')
     __monlaunch_exec = '/opt/ros/noetic/lib/rosmon_core/rosmon'
+    log_datetime = datetime.now().strftime('%Y-%m-%d_%H-%M')
 
     def __init__(self, quiet=False, screen=False, nodelet_manager_name=None, use_monlaunch=False):
         self.__running_launch_files_lock = threading.Lock()
@@ -188,7 +191,10 @@ class LaunchManager(object):
                 cmd = [self.__python_exec, _placeholder_script]
             else:
                 if self.__use_monlaunch:
-                    cmd = [self.__monlaunch_exec, '--disable-ui' ,launch_file]
+                    id = f'{os.path.splitext(launch_file)[0].split("/")[-1]}'
+                    rospy.set_param('/run_id', f"rosmon_{self.log_datetime}/{id}")
+                    sleep(4)
+                    cmd = [self.__monlaunch_exec, '--disable-ui', launch_file,  f'--name=rosmon_{id}_node']
                     rospy.loginfo(f'Using monlaunch for diagnostics, command executed: {self.__monlaunch_exec, launch_file}')
                 else:
                     if self.__screen:
