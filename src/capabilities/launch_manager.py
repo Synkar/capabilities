@@ -77,6 +77,12 @@ def which(program):
                 return exe_file
     return None
 
+def find_rosmon_exec():
+    try:
+        rosmon_path = subprocess.check_output(['rospack', 'find', 'rosmon_core'], text=True).strip()
+        return os.path.join(rosmon_path.replace('/share/', '/lib/'), 'rosmon')
+    except subprocess.CalledProcessError:
+        return None
 
 _this_dir = os.path.dirname(__file__)
 _placeholder_script = os.path.join(_this_dir, 'placeholder_script')
@@ -88,7 +94,7 @@ class LaunchManager(object):
     """Manages multiple launch files which implement capabilities"""
     __roslaunch_exec = which('roslaunch')
     __python_exec = which('python')
-    __monlaunch_exec = '/opt/ros/noetic/lib/rosmon_core/rosmon'
+    __monlaunch_exec = find_rosmon_exec()
     log_datetime = datetime.now().strftime('%Y-%m-%d_%H-%M')
 
     def __init__(self, quiet=False, screen=False, nodelet_manager_name=None, use_monlaunch=False):
